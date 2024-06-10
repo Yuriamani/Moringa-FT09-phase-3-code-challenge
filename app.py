@@ -1,5 +1,4 @@
 from database.setup import create_tables
-from database.connection import get_db_connection
 from models.article import Article
 from models.author import Author
 from models.magazine import Magazine
@@ -15,56 +14,36 @@ def main():
     article_title = input("Enter article title: ")
     article_content = input("Enter article content: ")
 
-    # Connect to the database
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    # Create an author instance
+    author = Author(name=author_name)
+    author.save()  # This method should insert the author into the database
 
+    # Create a magazine instance
+    magazine = Magazine(name=magazine_name, category=magazine_category)
+    magazine.save()  # This method should insert the magazine into the database
 
-    '''
-        The following is just for testing purposes, 
-        you can modify it to meet the requirements of your implmentation.
-    '''
+    # Create an article instance
+    article = Article(title=article_title, content=article_content, author=author, magazine=magazine)
+    article.save()  # This method should insert the article into the database
 
-    # Create an author
-    cursor.execute('INSERT INTO authors (name) VALUES (?)', (author_name,))
-    author_id = cursor.lastrowid # Use this to fetch the id of the newly created author
-
-    # Create a magazine
-    cursor.execute('INSERT INTO magazines (name, category) VALUES (?,?)', (magazine_name, magazine_category))
-    magazine_id = cursor.lastrowid # Use this to fetch the id of the newly created magazine
-
-    # Create an article
-    cursor.execute('INSERT INTO articles (title, content, author_id, magazine_id) VALUES (?, ?, ?, ?)',
-                   (article_title, article_content, author_id, magazine_id))
-
-    conn.commit()
-
-    # Query the database for inserted records. 
-    # The following fetch functionality should probably be in their respective models
-
-    cursor.execute('SELECT * FROM magazines')
-    magazines = cursor.fetchall()
-
-    cursor.execute('SELECT * FROM authors')
-    authors = cursor.fetchall()
-
-    cursor.execute('SELECT * FROM articles')
-    articles = cursor.fetchall()
-
-    conn.close()
-
-    # Display results
+    # Fetch all magazines
+    magazines = Magazine.get_all()
     print("\nMagazines:")
-    for magazine in magazines:
-        print(Magazine(magazine["id"], magazine["name"], magazine["category"]))
+    for mag in magazines:
+        print(mag)
 
+    # Fetch all authors
+    authors = Author.get_all()
     print("\nAuthors:")
-    for author in authors:
-        print(Author(author["id"], author["name"]))
+    for auth in authors:
+        print(auth)
 
+    # Fetch all articles
+    articles = Article.get_all()
     print("\nArticles:")
-    for article in articles:
-        print(Article(article["id"], article["title"], article["content"], article["author_id"], article["magazine_id"]))
+    for art in articles:
+        print(art)
+
 
 if __name__ == "__main__":
     main()
